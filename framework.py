@@ -48,3 +48,15 @@ class Map():
                     window.blit(self.tile1, (x * 16 - scroll[0], y * 16 - scroll[1]) )
                 x += 1
             y += 1
+#Bullets
+class Bullet():
+    def __init__(self, bullet_pos) -> None:
+        self.bullet_pos = bullet_pos
+        self.rect = pygame.rect.Rect(bullet_pos[0], bullet_pos[1], 3,3)
+    
+    def draw(self, window):
+        pygame.draw.circle(window, (255,0,0), self.bullet_pos, 2)
+    
+    def move_bullet(self):
+        self.rect.x += 5
+        self.bullet_pos[0] += 5
