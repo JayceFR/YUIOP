@@ -2,7 +2,7 @@ from cmath import rect
 import pygame
 
 class Player():
-    def __init__(self, x,y,width,height, player_img):
+    def __init__(self, x,y,width,height, player_img, idle_animation):
         self.rect = pygame.Rect(x,y,width*2,height*2)
         self.display_x = 0
         self.display_y = 0 
@@ -14,6 +14,10 @@ class Player():
         self.player_img = player_img.copy()
         self.player_img = pygame.transform.scale(self.player_img, (player_img.get_width()*2, player_img.get_height()*2))
         self.player_img.set_colorkey((0,0,0))
+        self.idle_animation = idle_animation
+        self.frame = 0 
+        self.frame_last_update = 0
+        self.frame_cooldown = 200
         self.gravity = 5
         self.speed = 10
 
@@ -22,7 +26,7 @@ class Player():
         self.display_y = self.rect.y
         self.rect.x = self.rect.x - scroll[0]
         self.rect.y = self.rect.y - scroll[1]
-        window.blit(self.player_img, self.rect)
+        window.blit(self.idle_animation[self.frame], self.rect)
         #pygame.draw.rect(window, (255,255,0), self.rect)
         self.rect.x = self.display_x
         self.rect.y = self.display_y
@@ -56,7 +60,7 @@ class Player():
                 collision_types["top"] = True
         return collision_types
 
-    def move(self, tiles, dt):
+    def move(self, tiles, time, dt):
         self.movement = [0, 0]
         if self.moving_right:
             self.movement[0] += self.speed * dt
@@ -70,6 +74,12 @@ class Player():
             if self.facing_right:
                 self.facing_left = True
                 self.facing_right = False
+        #Frame
+        if time - self.frame_last_update > self.frame_cooldown:
+            self.frame += 1
+            if self.frame > 3:
+                self.frame = 0
+            self.frame_last_update = time
 
         key = pygame.key.get_pressed()
         current_time = pygame.time.get_ticks()
