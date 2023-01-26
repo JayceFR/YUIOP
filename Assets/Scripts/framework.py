@@ -1,4 +1,4 @@
-from cmath import rect
+import random
 import pygame
 
 class Player():
@@ -138,6 +138,17 @@ class Bullet():
     def move_bullet(self):
         self.rect.x += 5
         self.bullet_pos[0] += 5
+
+class Glow():
+    def __init__(self, loc):
+        self.master_glow = []
+        for x in range(30):
+            self.master_glow.append(Circles(loc[0] + random.randint(-30,30), loc[1] + random.randint(-30,30), random.randint(20,50), random.randint(50,70), random.randint(-2,2)))
+
+    def update(self, time, display, scroll):
+        for glow in self.master_glow:
+            glow.draw(display, scroll)
+            glow.move(time)
 
 class Circles():
     def __init__(self,x,y,radius, cooldown, dradius) -> None:

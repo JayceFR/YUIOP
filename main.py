@@ -46,9 +46,9 @@ radius_update_cooldown = 50
 #Mouse Settings
 pygame.mouse.set_visible(False)
 #lightings
-lightnings = []
-for x in range(5):
-    lightnings.append(f.Circles(random.randint(0,1000), random.randint(0,500), random.randint(90,130), random.randint(80,90), random.randint(-5,5)))
+glow_effects = []
+for x in range(10):
+    glow_effects.append(f.Glow((random.randint(0,1000), random.randint(0,500))))
 #background stripes
 bg = backg.background()
 bg_particle_effect = bg_particles.Master()
@@ -95,9 +95,8 @@ while run:
         if radius < 40:
             dradius  = 1
         radius_last_update = time
-    for light in lightnings:
-        light.move(time)
-        light.draw(black_display, scroll)
+    for glow_effect in glow_effects:
+        glow_effect.update(time, black_display, scroll)
     black_display.set_colorkey((0,0,0))
     display.blit(black_display, (0,0), special_flags=BLEND_RGBA_MIN)
     surf = pygame.transform.scale(display, (screen_w, screen_h))
