@@ -3,7 +3,7 @@ import pygame
 
 class Player():
     def __init__(self, x,y,width,height, player_img, idle_animation):
-        self.rect = pygame.Rect(x,y,width*2,height*2)
+        self.rect = pygame.Rect(x,y,width,height)
         self.display_x = 0
         self.display_y = 0 
         self.moving_left = False
@@ -102,9 +102,10 @@ class Player():
         return self.rect
 #Map 
 class Map():
-    def __init__(self, map_loc, tile1):
+    def __init__(self, map_loc, tile1, tree):
         self.map = [] 
         self.tile1 = tile1
+        self.tree = tree
         f = open(map_loc, "r")
         data = f.read()
         f.close()
@@ -116,16 +117,21 @@ class Map():
         x = 0
         y = 0 
         tile_rects = []
+        grass_loc = []
         for row in self.map:
             x = 0 
             for element in row:
                 if element == "1":
-                    window.blit(self.tile1, (x * 16 - scroll[0], y * 16 - scroll[1]) )
-                if element != "0":
-                    tile_rects.append(pygame.rect.Rect(x*16,y*16,16,16))
+                    window.blit(self.tile1, (x * 32 - scroll[0], y * 32 - scroll[1]))
+                if element == "t":
+                    window.blit(self.tree, (x * 32 - scroll[0] - 70, y * 32 - scroll[1] - 150))
+                if element == "g":
+                    grass_loc.append((x*32, y*32))
+                if element != "0" and element != "t" and element != "g":
+                    tile_rects.append(pygame.rect.Rect(x*32,y*32,32,32))
                 x += 1
             y += 1
-        return tile_rects
+        return tile_rects, grass_loc
 #Bullets
 class Bullet():
     def __init__(self, bullet_pos) -> None:

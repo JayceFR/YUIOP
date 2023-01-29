@@ -4,6 +4,7 @@ import random
 import Assets.Scripts.framework as f
 import Assets.Scripts.background as backg
 import Assets.Scripts.bg_particles as bg_particles
+import Assets.Scripts.grass as g
 pygame.init()
 from pygame.locals import *
 
@@ -15,6 +16,11 @@ def get_image(sheet, frame, width, height, scale, colorkey):
     image.set_colorkey(colorkey)
     return image
 
+def blit_grass(grasses, display, scroll, player):
+    for grass in grasses:
+        if grass.get_rect().colliderect(player.get_rect()):
+            grass.colliding()
+        grass.draw(display, scroll)
 #Display settings 
 screen_w = 1000
 screen_h = 600
@@ -25,16 +31,28 @@ pygame.display.set_caption("YUIOP")
 run = True
 clock = pygame.time.Clock()
 #Loading Images
-tile1 = pygame.image.load("./Assets/Tiles/tile1.png").convert_alpha()
+tile1_img = pygame.image.load("./Assets/Tiles/tile1.png").convert_alpha()
+tile1 = tile1_img.copy()
+tile1 = pygame.transform.scale(tile1_img, (32,32))
 player_img = pygame.image.load("./Assets/Sprites/player_img.png").convert_alpha()
 player_idle_img = pygame.image.load("./Assets/Sprites/player_idle.png").convert_alpha()
+tree_img_copy = pygame.image.load("./Assets/Sprites/tree.png").convert_alpha()
+tree_img = tree_img_copy.copy()
+tree_img = pygame.transform.scale(tree_img_copy, (tree_img_copy.get_width()*3, tree_img_copy.get_height()*3))
+tree_img.set_colorkey((0,0,0))
+#Grass
+grasses = []
+grass_loc = []
+grass_spawn = True
+grass_last_update = 0
+grass_cooldown = 50
 #Map
-map = f.Map("./Assets/Maps/map.txt",tile1 )
+map = f.Map("./Assets/Maps/map.txt",tile1,tree_img)
 #Player settings
 player_idle_animation = []
 for x in range(4):
     player_idle_animation.append(get_image(player_idle_img, x, 21, 34, 2, (0,0,0)))
-player = f.Player(30,30,32,32, player_img, player_idle_animation)
+player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation)
 #Random Variables
 true_scroll = [0,0]
 scroll = [0,0]
@@ -67,7 +85,21 @@ while run:
     display.blit(blur_surf, (0,0))
     #Mouse Settings 
     mpos = pygame.mouse.get_pos()
-    tile_rects = map.blit_map(display, scroll)
+    #Blitting the Map
+    tile_rects, grass_loc = map.blit_map(display, scroll)
+    #Creating Items
+    if grass_spawn:
+        for loc in grass_loc:
+            x_pos = loc[0]
+            while x_pos < loc[0] + 32:
+                x_pos += 2.5
+                grasses.append(g.grass([x_pos, loc[1]+14], 2, 18))
+        grass_spawn = False
+    #Movement of grass
+    if time - grass_last_update > grass_cooldown:
+        for grass in grasses:
+            grass.move()
+        grass_last_update = time
     #Calculating Scroll
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 262) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 162) / 5
@@ -77,6 +109,8 @@ while run:
     #Player Blitting
     player.move(tile_rects, time, dt)
     player.draw(display, scroll)
+    #Blitting Items After Blitting The Player
+    blit_grass(grasses, display, scroll, player)
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
