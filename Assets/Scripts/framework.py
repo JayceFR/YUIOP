@@ -2,7 +2,7 @@ import random
 import pygame
 
 class Player():
-    def __init__(self, x,y,width,height, player_img, idle_animation):
+    def __init__(self, x,y,width,height, player_img, idle_animation, run_animation):
         self.rect = pygame.Rect(x,y,width,height)
         self.display_x = 0
         self.display_y = 0 
@@ -15,18 +15,36 @@ class Player():
         self.player_img = pygame.transform.scale(self.player_img, (player_img.get_width()*2, player_img.get_height()*2))
         self.player_img.set_colorkey((0,0,0))
         self.idle_animation = idle_animation
+        self.run_animation = run_animation
         self.frame = 0 
         self.frame_last_update = 0
         self.frame_cooldown = 200
         self.gravity = 5
-        self.speed = 10
+        self.speed = 5
+        self.acceleration = 0.02
+        self.deceleration = 0.2
 
     def draw(self, window, scroll):
         self.display_x = self.rect.x
         self.display_y = self.rect.y
         self.rect.x = self.rect.x - scroll[0]
         self.rect.y = self.rect.y - scroll[1]
-        window.blit(self.idle_animation[self.frame], self.rect)
+        if not self.moving_left and  not self.moving_right:
+            if self.facing_right:
+                window.blit(self.idle_animation[self.frame], self.rect)
+            else:
+                flip = self.idle_animation[self.frame].copy()
+                flip = pygame.transform.flip(self.idle_animation[self.frame], True, False)
+                flip.set_colorkey((0,0,0))
+                window.blit(flip, self.rect)
+        else:
+            if self.facing_right:
+                window.blit(self.run_animation[self.frame], self.rect)
+            else:
+                flip = self.run_animation[self.frame].copy()
+                flip = pygame.transform.flip(self.run_animation[self.frame], True, False)
+                flip.set_colorkey((0,0,0))
+                window.blit(flip, self.rect)
         #pygame.draw.rect(window, (255,255,0), self.rect)
         self.rect.x = self.display_x
         self.rect.y = self.display_y
@@ -62,6 +80,16 @@ class Player():
 
     def move(self, tiles, time, dt):
         self.movement = [0, 0]
+        if self.moving_left or self.moving_right:
+            self.speed += self.acceleration
+            if self.speed > 8:
+                self.speed = 8
+            self.frame_cooldown -= self.deceleration
+            if self.frame_cooldown < 100:
+                self.frame_cooldown = 100
+        else:
+            self.speed = 5
+            self.frame_cooldown = 200
         if self.moving_right:
             self.movement[0] += self.speed * dt
             self.moving_right = False

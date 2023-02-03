@@ -40,6 +40,7 @@ for x in range(9):
 print(tiles)
 player_img = pygame.image.load("./Assets/Sprites/player_img.png").convert_alpha()
 player_idle_img = pygame.image.load("./Assets/Sprites/player_idle.png").convert_alpha()
+player_run_img = pygame.image.load("./Assets/Sprites/player_run.png").convert_alpha()
 tree_img_copy = pygame.image.load("./Assets/Sprites/tree.png").convert_alpha()
 tree_img = tree_img_copy.copy()
 tree_img = pygame.transform.scale(tree_img_copy, (tree_img_copy.get_width()*3, tree_img_copy.get_height()*3))
@@ -54,9 +55,12 @@ grass_cooldown = 50
 map = f.Map("./Assets/Maps/map.txt",tiles,tree_img)
 #Player settings
 player_idle_animation = []
+player_run_animation = []
 for x in range(4):
     player_idle_animation.append(get_image(player_idle_img, x, 21, 33, 2, (0,0,0)))
-player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation)
+for x in range(4):
+    player_run_animation.append(get_image(player_run_img, x, 21, 33, 2, (0,0,0)))
+player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation, player_run_animation)
 #Random Variables
 true_scroll = [0,0]
 scroll = [0,0]
