@@ -31,9 +31,13 @@ pygame.display.set_caption("YUIOP")
 run = True
 clock = pygame.time.Clock()
 #Loading Images
-tile1_img = pygame.image.load("./Assets/Tiles/tile1.png").convert_alpha()
-tile1 = tile1_img.copy()
-tile1 = pygame.transform.scale(tile1_img, (32,32))
+tiles = []
+for x in range(9):
+    current_tile = pygame.image.load("./Assets/Tiles/tile{tile_pos}.png".format(tile_pos = str(x+1))).convert_alpha()
+    tile_dup = current_tile.copy()
+    tile_dup = pygame.transform.scale(tile_dup, (32,32))
+    tiles.append(tile_dup)
+print(tiles)
 player_img = pygame.image.load("./Assets/Sprites/player_img.png").convert_alpha()
 player_idle_img = pygame.image.load("./Assets/Sprites/player_idle.png").convert_alpha()
 tree_img_copy = pygame.image.load("./Assets/Sprites/tree.png").convert_alpha()
@@ -47,11 +51,11 @@ grass_spawn = True
 grass_last_update = 0
 grass_cooldown = 50
 #Map
-map = f.Map("./Assets/Maps/map.txt",tile1,tree_img)
+map = f.Map("./Assets/Maps/map.txt",tiles,tree_img)
 #Player settings
 player_idle_animation = []
 for x in range(4):
-    player_idle_animation.append(get_image(player_idle_img, x, 21, 34, 2, (0,0,0)))
+    player_idle_animation.append(get_image(player_idle_img, x, 21, 33, 2, (0,0,0)))
 player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation)
 #Random Variables
 true_scroll = [0,0]
@@ -65,7 +69,7 @@ radius_update_cooldown = 50
 pygame.mouse.set_visible(False)
 #lightings
 glow_effects = []
-for x in range(10):
+for x in range(50):
     glow_effects.append(f.Glow((random.randint(0,1000), random.randint(0,500))))
 #background stripes
 bg = backg.background()
@@ -77,7 +81,8 @@ while run:
     dt *= 60
     last_time = t.time()
     time = pygame.time.get_ticks()
-    display.fill((23,32,56))
+    #display.fill((23,32,56))
+    display.fill((30,29,57))
     #Stripes
     blur_surf = display.copy()
     bg.recursive_call(blur_surf)

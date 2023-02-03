@@ -102,9 +102,9 @@ class Player():
         return self.rect
 #Map 
 class Map():
-    def __init__(self, map_loc, tile1, tree):
+    def __init__(self, map_loc, tiles, tree):
         self.map = [] 
-        self.tile1 = tile1
+        self.tiles = tiles
         self.tree = tree
         f = open(map_loc, "r")
         data = f.read()
@@ -121,8 +121,8 @@ class Map():
         for row in self.map:
             x = 0 
             for element in row:
-                if element == "1":
-                    window.blit(self.tile1, (x * 32 - scroll[0], y * 32 - scroll[1]))
+                if element != "t" and element != "g" and element != "0":
+                    window.blit(self.tiles[int(element)-1], (x * 32 - scroll[0], y * 32 - scroll[1]))
                 if element == "t":
                     window.blit(self.tree, (x * 32 - scroll[0] - 70, y * 32 - scroll[1] - 150))
                 if element == "g":
