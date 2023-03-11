@@ -5,6 +5,7 @@ import Assets.Scripts.framework as f
 import Assets.Scripts.background as backg
 import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.grass as g
+import Assets.Scripts.circle_back as back_circles
 pygame.init()
 from pygame.locals import *
 
@@ -68,6 +69,7 @@ radius = 100
 dradius = 1
 radius_last_update = 0
 radius_update_cooldown = 50
+circle_back = back_circles.CircleGen()
 #Mouse Settings
 pygame.mouse.set_visible(False)
 #lightings
@@ -91,12 +93,12 @@ while run:
     #display.fill((23,32,56))
     display.fill((21,29,40))
     #display.fill((33,33,33))
-    
+    circle_back.update(time, display)
     #Stripes
     blur_surf = display.copy()
     bg.recursive_call(blur_surf)
     blur_surf.set_alpha(50)
-    display.blit(blur_surf, (0,0))
+    #display.blit(blur_surf, (0,0))
     #Mouse Settings 
     mpos = pygame.mouse.get_pos()
     #Blitting the Map
