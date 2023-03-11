@@ -177,7 +177,7 @@ class Glow():
     def __init__(self, loc):
         self.master_glow = []
         for x in range(30):
-            self.master_glow.append(Circles(loc[0] + random.randint(-30,30), loc[1] + random.randint(-30,30), random.randint(20,50), random.randint(50,70), random.randint(-2,2)))
+            self.master_glow.append(Circles(loc[0] + random.randint(-30,30), loc[1] + random.randint(-30,30), random.randint(5,10), random.randint(50,70), random.randint(-2,2)))
 
     def update(self, time, display, scroll):
         for glow in self.master_glow:
@@ -207,4 +207,4 @@ class Circles():
     
 
     def draw(self, display, scroll):
-        pygame.draw.circle(display, (255,255,255), (self.x - scroll[0], self.y - scroll[1]),self.radius)
+        pygame.draw.circle(display, (0,0,0), (self.x - scroll[0], self.y - scroll[1]),self.radius)

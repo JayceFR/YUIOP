@@ -37,14 +37,13 @@ for x in range(9):
     tile_dup = current_tile.copy()
     tile_dup = pygame.transform.scale(tile_dup, (32,32))
     tiles.append(tile_dup)
-print(tiles)
 player_img = pygame.image.load("./Assets/Sprites/player_img.png").convert_alpha()
 player_idle_img = pygame.image.load("./Assets/Sprites/player_idle.png").convert_alpha()
 player_run_img = pygame.image.load("./Assets/Sprites/player_run.png").convert_alpha()
 tree_img_copy = pygame.image.load("./Assets/Sprites/tree.png").convert_alpha()
 tree_img = tree_img_copy.copy()
 tree_img = pygame.transform.scale(tree_img_copy, (tree_img_copy.get_width()*3, tree_img_copy.get_height()*3))
-tree_img.set_colorkey((0,0,0))
+tree_img.set_colorkey((235,237,233))
 #Grass
 grasses = []
 grass_loc = []
@@ -57,9 +56,9 @@ map = f.Map("./Assets/Maps/map.txt",tiles,tree_img)
 player_idle_animation = []
 player_run_animation = []
 for x in range(4):
-    player_idle_animation.append(get_image(player_idle_img, x, 21, 33, 2, (0,0,0)))
+    player_idle_animation.append(get_image(player_idle_img, x, 21, 33, 1.2, (0,0,0)))
 for x in range(4):
-    player_run_animation.append(get_image(player_run_img, x, 21, 33, 2, (0,0,0)))
+    player_run_animation.append(get_image(player_run_img, x, 21, 33, 1.2, (0,0,0)))
 player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation, player_run_animation)
 #Random Variables
 true_scroll = [0,0]
@@ -73,8 +72,12 @@ radius_update_cooldown = 50
 pygame.mouse.set_visible(False)
 #lightings
 glow_effects = []
-for x in range(50):
-    glow_effects.append(f.Glow((random.randint(0,1000), random.randint(0,500))))
+for x in range(-100,0):
+    #glow_effects.append(f.Glow((random.randint(x,1000), random.randint(0,500))))
+    glow_effects.append(f.Glow((random.randint(x,1000), -20)))
+    glow_effects.append(f.Glow((random.randint(x,1000), 320)))
+    glow_effects.append(f.Glow((-20,random.randint(x,300))))
+    glow_effects.append(f.Glow((520,random.randint(x,300))))
 #background stripes
 bg = backg.background()
 bg_particle_effect = bg_particles.Master()
@@ -86,7 +89,9 @@ while run:
     last_time = t.time()
     time = pygame.time.get_ticks()
     #display.fill((23,32,56))
-    display.fill((30,29,57))
+    display.fill((21,29,40))
+    #display.fill((33,33,33))
+    
     #Stripes
     blur_surf = display.copy()
     bg.recursive_call(blur_surf)
@@ -127,21 +132,8 @@ while run:
             run = False
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
-    #Blitting the large circle around player
-    black_display = pygame.Surface((screen_w//2, screen_h//2))
-    black_display.fill((0,0,0))
-    pygame.draw.circle(black_display, (255,255,255), (player.get_rect().x - scroll[0] + 16, player.get_rect().y - scroll[1] + 16),radius)
-    if time - radius_last_update > radius_update_cooldown:
-        radius += dradius
-        if radius > 90:
-            dradius = -1
-        if radius < 40:
-            dradius  = 1
-        radius_last_update = time
-    for glow_effect in glow_effects:
-        glow_effect.update(time, black_display, scroll)
-    black_display.set_colorkey((0,0,0))
-    display.blit(black_display, (0,0), special_flags=BLEND_RGBA_MIN)
+    for effect in glow_effects:
+        effect.update(time, display, (0,0))
     surf = pygame.transform.scale(display, (screen_w, screen_h))
     window.blit(surf, (0, 0))
     pygame.display.flip()
