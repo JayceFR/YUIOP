@@ -91,13 +91,8 @@ while run:
     last_time = t.time()
     time = pygame.time.get_ticks()
     #display.fill((23,32,56))
-    display.fill((21,29,40))
+    display.fill((21,29,40 * 1.5))
     #display.fill((33,33,33))
-    circle_back.update(time, display)
-    #Stripes
-    blur_surf = display.copy()
-    bg.recursive_call(blur_surf)
-    blur_surf.set_alpha(50)
     #display.blit(blur_surf, (0,0))
     #Mouse Settings 
     mpos = pygame.mouse.get_pos()
@@ -134,8 +129,6 @@ while run:
             run = False
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
-    for effect in glow_effects:
-        effect.update(time, display, (0,0))
     surf = pygame.transform.scale(display, (screen_w, screen_h))
     window.blit(surf, (0, 0))
     pygame.display.flip()
