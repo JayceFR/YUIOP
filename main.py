@@ -116,7 +116,7 @@ while run:
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
     #Player Blitting
-    player.move(tile_rects, time, dt)
+    player.move(tile_rects, time, dt, display, scroll)
     player.draw(display, scroll)
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)

@@ -5,6 +5,8 @@ class Player():
     def __init__(self, x,y,width,height, player_img, idle_animation, run_animation):
         self.rect = pygame.Rect(x,y,width,height)
         self.display_x = 0
+        self.width = width
+        self.height = height
         self.display_y = 0 
         self.moving_left = False
         self.moving_right = False
@@ -26,6 +28,8 @@ class Player():
         self.jump_up_spped = 6
         self.air_timer = 0
         self.collision_type = {}
+        self.in_air = False
+        self.dusts = []
 
         self.speed = 5
         self.acceleration = 0.02
@@ -85,7 +89,7 @@ class Player():
                 collision_types["top"] = True
         return collision_types
 
-    def move(self, tiles, time, dt):
+    def move(self, tiles, time, dt, display, scroll):
         self.movement = [0, 0]
         if (self.moving_left or self.moving_right) and not self.jump:
             self.speed += self.acceleration
@@ -141,6 +145,21 @@ class Player():
             self.movement[1] += self.gravity
 
         self.collision_type = self.collision_checker(tiles)
+
+        if self.collision_type['bottom']:
+            if self.in_air:
+                #Just Landed
+                self.dusts.append(Dust((self.rect.x + self.width//2, self.rect.y + self.height), time , 120))
+            self.in_air = False
+        else:
+            self.in_air = True
+        
+        for pos, dust in sorted(enumerate(self.dusts), reverse=True):
+            if not dust.alive:
+                self.dusts.pop(pos)
+            else:
+                dust.draw(display, time, scroll)
+
 
     def get_rect(self):
         return self.rect
@@ -200,8 +219,25 @@ class Glow():
             glow.draw(display, scroll)
             glow.move(time)
 
+class Dust():
+    def __init__(self, loc, time, death_after_time) -> None:
+        self.loc = loc
+        self.master_dust = []
+        self.start_time = time
+        self.alive = True
+        self.death_after_time = death_after_time
+        for x in range(15):
+            self.master_dust.append(Circles(loc[0]+ random.randint(-10,10), loc[1] + random.randint(-5,5), random.randint(1,4), random.randint(0,10), random.randint(-2,2), (100,100,100)))
+
+    def draw(self, display, time, scroll):
+        if time - self.start_time > self.death_after_time:
+            self.alive = False
+        for dust in self.master_dust:
+            dust.move(time)
+            dust.draw(display, scroll)
+
 class Circles():
-    def __init__(self,x,y,radius, cooldown, dradius) -> None:
+    def __init__(self,x,y,radius, cooldown, dradius, color = (21,29,40)) -> None:
         self.x = x
         self.y = y
         self.radius = radius
@@ -210,6 +246,7 @@ class Circles():
         self.last_update = 0
         self.cooldown = cooldown
         self.dradius = dradius
+        self.color = color
         
     
     def move(self, time):
@@ -223,4 +260,4 @@ class Circles():
     
 
     def draw(self, display, scroll):
-        pygame.draw.circle(display, (21,29,40), (self.x - scroll[0], self.y - scroll[1]),self.radius)
+        pygame.draw.circle(display, self.color, (self.x - scroll[0], self.y - scroll[1]),self.radius)
