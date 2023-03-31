@@ -41,6 +41,10 @@ for x in range(9):
 player_img = pygame.image.load("./Assets/Sprites/player_img.png").convert_alpha()
 player_idle_img = pygame.image.load("./Assets/Sprites/player_idle.png").convert_alpha()
 player_run_img = pygame.image.load("./Assets/Sprites/player_run.png").convert_alpha()
+player_land_img_copy = pygame.image.load("./Assets/Sprites/player_land.png").convert_alpha()
+player_land_img = player_land_img_copy.copy()
+player_land_img = pygame.transform.scale(player_land_img_copy, (player_land_img_copy.get_width() * 1.2, player_land_img_copy.get_height() * 1.2))
+player_land_img.set_colorkey((0,0,0))
 tree_img_copy = pygame.image.load("./Assets/Sprites/tree.png").convert_alpha()
 tree_img = tree_img_copy.copy()
 tree_img = pygame.transform.scale(tree_img_copy, (tree_img_copy.get_width()*3, tree_img_copy.get_height()*3))
@@ -60,7 +64,7 @@ for x in range(4):
     player_idle_animation.append(get_image(player_idle_img, x, 21, 33, 1.2, (0,0,0)))
 for x in range(4):
     player_run_animation.append(get_image(player_run_img, x, 21, 33, 1.2, (0,0,0)))
-player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation, player_run_animation)
+player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animation[0].get_height(), player_img, player_idle_animation, player_run_animation, player_land_img)
 #Random Variables
 true_scroll = [0,0]
 scroll = [0,0]

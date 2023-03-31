@@ -2,7 +2,7 @@ import random
 import pygame
 
 class Player():
-    def __init__(self, x,y,width,height, player_img, idle_animation, run_animation):
+    def __init__(self, x,y,width,height, player_img, idle_animation, run_animation, land_img):
         self.rect = pygame.Rect(x,y,width,height)
         self.display_x = 0
         self.width = width
@@ -12,6 +12,7 @@ class Player():
         self.moving_right = False
         self.facing_left = False
         self.facing_right = True
+        self.land_img = land_img
         self.movement = [0,0]
         self.player_img = player_img.copy()
         self.player_img = pygame.transform.scale(self.player_img, (player_img.get_width()*2, player_img.get_height()*2))
@@ -29,6 +30,9 @@ class Player():
         self.air_timer = 0
         self.collision_type = {}
         self.in_air = False
+        self.recover = False
+        self.recover_cooldown = 500
+        self.recover_last_update = 0
         self.dusts = []
 
         self.speed = 5
@@ -40,13 +44,24 @@ class Player():
         self.display_y = self.rect.y
         self.rect.x = self.rect.x - scroll[0]
         self.rect.y = self.rect.y - scroll[1]
+        #if self.recover:
+        #    window.blit(self.land_img, self.rect)
         if not self.moving_left and  not self.moving_right:
             if self.facing_right:
-                window.blit(self.idle_animation[self.frame], self.rect)
+                if self.recover:
+                    window.blit(self.land_img, self.rect)
+                else:
+                    window.blit(self.idle_animation[self.frame], self.rect)
+
             else:
-                flip = self.idle_animation[self.frame].copy()
-                flip = pygame.transform.flip(self.idle_animation[self.frame], True, False)
-                flip.set_colorkey((0,0,0))
+                if self.recover:
+                    flip = self.land_img.copy()
+                    flip = pygame.transform.flip(self.land_img, True, False)
+                    flip.set_colorkey((0,0,0))
+                else:
+                    flip = self.idle_animation[self.frame].copy()
+                    flip = pygame.transform.flip(self.idle_animation[self.frame], True, False)
+                    flip.set_colorkey((0,0,0))
                 window.blit(flip, self.rect)
         else:
             if self.facing_right:
@@ -56,6 +71,7 @@ class Player():
                 flip = pygame.transform.flip(self.run_animation[self.frame], True, False)
                 flip.set_colorkey((0,0,0))
                 window.blit(flip, self.rect)
+        
         #pygame.draw.rect(window, (255,255,0), self.rect)
         self.rect.x = self.display_x
         self.rect.y = self.display_y
@@ -149,10 +165,16 @@ class Player():
         if self.collision_type['bottom']:
             if self.in_air:
                 #Just Landed
+                self.recover = True
+                self.recover_last_update = time
                 self.dusts.append(Dust((self.rect.x + self.width//2, self.rect.y + self.height), time , 120))
             self.in_air = False
         else:
             self.in_air = True
+        
+        if self.recover:
+            if time - self.recover_last_update > self.recover_cooldown:
+                self.recover = False
         
         for pos, dust in sorted(enumerate(self.dusts), reverse=True):
             if not dust.alive:
