@@ -20,6 +20,13 @@ class Player():
         self.frame_last_update = 0
         self.frame_cooldown = 200
         self.gravity = 5
+        self.jump = False
+        self.jump_last_update = 0
+        self.jump_cooldown = 600
+        self.jump_up_spped = 6
+        self.air_timer = 0
+        self.collision_type = {}
+
         self.speed = 5
         self.acceleration = 0.02
         self.deceleration = 0.2
@@ -80,7 +87,7 @@ class Player():
 
     def move(self, tiles, time, dt):
         self.movement = [0, 0]
-        if self.moving_left or self.moving_right:
+        if (self.moving_left or self.moving_right) and not self.jump:
             self.speed += self.acceleration
             if self.speed > 8:
                 self.speed = 8
@@ -102,6 +109,16 @@ class Player():
             if self.facing_right:
                 self.facing_left = True
                 self.facing_right = False
+        if self.jump:
+            if self.air_timer < 20:
+                self.air_timer += 1
+                self.movement[1] -= self.jump_up_spped
+                self.jump_up_spped -= 0.5
+            else:
+                self.air_timer = 0
+                self.jump = False
+                self.jump_up_spped = 6
+
         #Frame
         if time - self.frame_last_update > self.frame_cooldown:
             self.frame += 1
@@ -110,21 +127,20 @@ class Player():
             self.frame_last_update = time
 
         key = pygame.key.get_pressed()
-        current_time = pygame.time.get_ticks()
         if key[pygame.K_LEFT] or key[pygame.K_a]:
             self.moving_left = True
         if key[pygame.K_RIGHT] or key[pygame.K_d]:
             self.moving_right = True
         if key[pygame.K_SPACE] or key[pygame.K_w]:
-            if current_time - self.jump_last_update > self.jump_cooldown:
-                self.jump = True
-                self.jump_last_update = current_time
-                if self.air_timer < 6:
-                    gravity = -60
+            if not self.jump and self.collision_type['bottom']:
+                if time - self.jump_last_update > self.jump_cooldown:
+                    self.jump = True
+                    self.jump_last_update = time
+        
+        if not self.jump:
+            self.movement[1] += self.gravity
 
-        self.movement[1] += self.gravity
-
-        collision_type = self.collision_checker(tiles)
+        self.collision_type = self.collision_checker(tiles)
 
     def get_rect(self):
         return self.rect
@@ -177,7 +193,7 @@ class Glow():
     def __init__(self, loc):
         self.master_glow = []
         for x in range(30):
-            self.master_glow.append(Circles(loc[0] + random.randint(-30,30), loc[1] + random.randint(-30,30), random.randint(5,10), random.randint(50,70), random.randint(-2,2)))
+            self.master_glow.append(Circles(loc[0] + random.randint(-30,30), loc[1] + random.randint(-30,30), random.randint(5,20), random.randint(50,70), random.randint(-2,2)))
 
     def update(self, time, display, scroll):
         for glow in self.master_glow:
@@ -207,4 +223,4 @@ class Circles():
     
 
     def draw(self, display, scroll):
-        pygame.draw.circle(display, (0,0,0), (self.x - scroll[0], self.y - scroll[1]),self.radius)
+        pygame.draw.circle(display, (21,29,40), (self.x - scroll[0], self.y - scroll[1]),self.radius)

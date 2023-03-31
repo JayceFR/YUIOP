@@ -74,12 +74,8 @@ circle_back = back_circles.CircleGen()
 pygame.mouse.set_visible(False)
 #lightings
 glow_effects = []
-for x in range(-100,0):
-    #glow_effects.append(f.Glow((random.randint(x,1000), random.randint(0,500))))
-    glow_effects.append(f.Glow((random.randint(x,1000), -20)))
-    glow_effects.append(f.Glow((random.randint(x,1000), 320)))
-    glow_effects.append(f.Glow((-20,random.randint(x,300))))
-    glow_effects.append(f.Glow((520,random.randint(x,300))))
+for x in range(150):
+    glow_effects.append(f.Glow((random.randint(-1000, 3000), random.randint(-100,700))))
 #background stripes
 bg = backg.background()
 bg_particle_effect = bg_particles.Master()
@@ -90,10 +86,12 @@ while run:
     dt *= 60
     last_time = t.time()
     time = pygame.time.get_ticks()
-    #display.fill((23,32,56))
-    display.fill((21,29,40 * 1.5))
-    #display.fill((33,33,33))
-    #display.blit(blur_surf, (0,0))
+    #display.fill((21,29,40 * 1.5))
+    display.fill((0,0,0))
+    #VFX
+    for glow_effect in glow_effects:
+        glow_effect.update(time, display, scroll)
+    bg.recursive_call(display)
     #Mouse Settings 
     mpos = pygame.mouse.get_pos()
     #Blitting the Map
