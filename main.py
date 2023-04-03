@@ -1,6 +1,8 @@
 #TODO -> Weapons and Inventory for the player
 #           1 -> katana
 #           2 -> gun
+#TODO -> Health Bar For Player
+#TODO -> Make enemies spawn 
 
 import pygame 
 import time as t
@@ -26,6 +28,21 @@ def blit_grass(grasses, display, scroll, player):
         if grass.get_rect().colliderect(player.get_rect()):
             grass.colliding()
         grass.draw(display, scroll)
+
+def blit_inventory(display, inventory, font):
+    left = 400
+    pygame.draw.line(display, (255,255,255), (left - 10, 300), (left, 270))
+    pygame.draw.line(display, (255,255,255), (left, 270), (500, 270))
+    for x in range(len(inventory)):
+        pygame.draw.rect(display, (150,0,0), pygame.rect.Rect(left, 275, 20, 20), border_radius=5)
+        draw_text(str(x+1), font, (255,255,255), left + 9, 294, display)
+        pygame.draw.rect(display, (0,0,0), pygame.rect.Rect(left + 2, 275 + 2.5, 20 - 2.5, 20 - 2.5), border_radius=4)
+        left += 25
+
+def draw_text(text, font, text_col, x, y, display):
+    img = font.render(text, True, text_col)
+    display.blit(img, (x, y))
+
 #Display settings 
 screen_w = 1000
 screen_h = 600
@@ -76,6 +93,8 @@ last_time = t.time()
 circle_back = back_circles.CircleGen()
 #Mouse Settings
 pygame.mouse.set_visible(False)
+#Fonts
+inven_font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 5)
 #lightings
 glow_effects = []
 for x in range(150):
@@ -83,6 +102,8 @@ for x in range(150):
 #background stripes
 bg = backg.background()
 bg_particle_effect = bg_particles.Master()
+#Inventory
+inventory = ["", "", "", ""]
 #Main Game Loop
 while run:
     clock.tick(60)
@@ -124,11 +145,14 @@ while run:
     player.draw(display, scroll)
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)
+    blit_inventory(display, inventory, inven_font)
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(event)
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
     surf = pygame.transform.scale(display, (screen_w, screen_h))
