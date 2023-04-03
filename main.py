@@ -7,6 +7,7 @@
 import pygame 
 import time as t
 import random
+import math
 import Assets.Scripts.framework as f
 import Assets.Scripts.background as backg
 import Assets.Scripts.bg_particles as bg_particles
@@ -152,7 +153,11 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print(event)
+            if event.button == 1:
+                print("Clicked", mpos[0]//2, mpos[1]//2, player.get_rect().x - scroll[0], player.get_rect().y - scroll[1])
+                angle = math.atan((player.get_rect().y - scroll[1] - mpos[1]//2) / (player.get_rect().x - scroll[0] - mpos[0]//2))
+                print(angle)
+                
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
     surf = pygame.transform.scale(display, (screen_w, screen_h))
