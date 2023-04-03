@@ -13,6 +13,7 @@ import Assets.Scripts.background as backg
 import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.grass as g
 import Assets.Scripts.circle_back as back_circles
+import Assets.Scripts.bullet as bullet_class
 pygame.init()
 from pygame.locals import *
 
@@ -105,6 +106,8 @@ bg = backg.background()
 bg_particle_effect = bg_particles.Master()
 #Inventory
 inventory = ["", "", "", ""]
+#Bullets
+bullet_list = []
 #Main Game Loop
 while run:
     clock.tick(60)
@@ -147,6 +150,9 @@ while run:
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)
     blit_inventory(display, inventory, inven_font)
+    for bullet in bullet_list:
+        bullet.move()
+        bullet.draw(display)
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
@@ -155,9 +161,16 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 print("Clicked", mpos[0]//2, mpos[1]//2, player.get_rect().x - scroll[0], player.get_rect().y - scroll[1])
-                angle = math.atan((player.get_rect().y - scroll[1] - mpos[1]//2) / (player.get_rect().x - scroll[0] - mpos[0]//2))
+                if player.right_facing():
+                    player_x = player.get_rect().x + 32
+                    player_y = player.get_rect().y + 15
+                else:
+                    player_x = player.get_rect().x - 14
+                    player_y = player.get_rect().y + 15
+                angle = math.atan2((player_y - scroll[1] - mpos[1]//2) , (player_x - scroll[0] - mpos[0]//2))
                 print(angle)
-                
+                angle = angle * -1
+                bullet_list.append(bullet_class.Bullet((player_x - scroll[0], player_y - scroll[1]), 10, 10, None, angle))
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
     surf = pygame.transform.scale(display, (screen_w, screen_h))

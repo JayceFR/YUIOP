@@ -185,6 +185,9 @@ class Player():
 
     def get_rect(self):
         return self.rect
+
+    def right_facing(self):
+        return self.facing_right
 #Map 
 class Map():
     def __init__(self, map_loc, tiles, tree):
