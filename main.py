@@ -1,3 +1,7 @@
+#TODO -> Weapons and Inventory for the player
+#           1 -> katana
+#           2 -> gun
+
 import pygame 
 import time as t
 import random
@@ -69,10 +73,6 @@ player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animati
 true_scroll = [0,0]
 scroll = [0,0]
 last_time = t.time()
-radius = 100
-dradius = 1
-radius_last_update = 0
-radius_update_cooldown = 50
 circle_back = back_circles.CircleGen()
 #Mouse Settings
 pygame.mouse.set_visible(False)
