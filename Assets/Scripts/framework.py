@@ -105,7 +105,7 @@ class Player():
                 collision_types["top"] = True
         return collision_types
 
-    def move(self, tiles, time, dt, display, scroll):
+    def move(self, tiles, time, dt, display, scroll, facing_right):
         self.movement = [0, 0]
         if (self.moving_left or self.moving_right) and not self.jump:
             self.speed += self.acceleration
@@ -181,6 +181,13 @@ class Player():
                 self.dusts.pop(pos)
             else:
                 dust.draw(display, time, scroll)
+        
+        if facing_right:
+            self.facing_right = True
+            self.facing_left = False
+        else:
+            self.facing_left = True
+            self.facing_right = False
 
 
     def get_rect(self):

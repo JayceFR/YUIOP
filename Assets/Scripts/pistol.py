@@ -1,29 +1,49 @@
 import pygame
-import bullet as b
+import math
+import Assets.Scripts.bullet as b
 
-class pistol():
+class Pistol():
     def __init__(self, loc, width, height, pistol_img, bullet_img) -> None:
         self.rect = pygame.rect.Rect(loc[0], loc[1], width, height)
         self.dup_x = 0
+        self.facing_right = True
         self.dup_y = 0
         self.pistol_img = pistol_img
         self.bullet_img = bullet_img
         self.bullets = []
     
-    def draw(self, display, scroll):
+    def draw(self, display, scroll, angle):
         self.dup_x = self.rect.x
         self.dup_y = self.rect.y
         self.rect.x -= scroll[0]
         self.rect.y -= scroll[1]
-        display.blit(self.pistol_img, self.rect)
+        display_gun = self.pistol_img.copy()
+        display_gun = pygame.transform.rotate(display_gun, math.degrees(angle))
+        if math.degrees(angle) < -91.0 or math.degrees(angle) > 91.0:
+            display_gun_copy = self.pistol_img.copy()
+            display_gun_copy = pygame.transform.flip(display_gun_copy, False, True)
+            display_gun_copy = pygame.transform.rotate(display_gun_copy, math.degrees(angle))
+            display.blit(display_gun_copy, self.rect)
+            self.facing_right = False
+        else: 
+            display.blit(display_gun, self.rect)
+            self.facing_right = True
         self.rect.x = self.dup_x
         self.rect.y = self.dup_y
-        for bullet in b.Bullet:
+        for bullet in self.bullets:
             bullet.draw(display)
     
-    def update(self):
-        for bullet in b.Bullet:
-            bullet.move()
+    def update(self, new_loc):
+        for pos, bullet in sorted(enumerate(self.bullets), reverse=True):
+            if bullet.alive:
+                bullet.move()
+            else:
+                self.bullets.pop(pos)
+        self.rect.x = new_loc[0]
+        self.rect.y = new_loc[1]
+    
+    def facing_direction(self):
+        return self.facing_right
             
 
     def shoot(self, loc, width, height, angle):

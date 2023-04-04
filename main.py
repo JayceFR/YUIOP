@@ -13,7 +13,7 @@ import Assets.Scripts.background as backg
 import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.grass as g
 import Assets.Scripts.circle_back as back_circles
-import Assets.Scripts.bullet as bullet_class
+import Assets.Scripts.pistol as pistol
 pygame.init()
 from pygame.locals import *
 
@@ -72,6 +72,9 @@ tree_img_copy = pygame.image.load("./Assets/Sprites/tree.png").convert_alpha()
 tree_img = tree_img_copy.copy()
 tree_img = pygame.transform.scale(tree_img_copy, (tree_img_copy.get_width()*3, tree_img_copy.get_height()*3))
 tree_img.set_colorkey((235,237,233))
+pistol_img = pygame.image.load("./Assets/Entities/pistol.png").convert_alpha()
+pistol_img.set_colorkey((0,0,0))
+bullet_img = pygame.image.load("./Assets/Entities/bullet.png").convert_alpha()
 #Grass
 grasses = []
 grass_loc = []
@@ -106,8 +109,9 @@ bg = backg.background()
 bg_particle_effect = bg_particles.Master()
 #Inventory
 inventory = ["", "", "", ""]
-#Bullets
-bullet_list = []
+#Pistol
+angle = 0
+yeagle = pistol.Pistol((35, 45), pistol_img.get_width(), pistol_img.get_height(), pistol_img, bullet_img)
 #Main Game Loop
 while run:
     clock.tick(60)
@@ -144,15 +148,25 @@ while run:
     scroll = true_scroll.copy()
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
+    #Blitting The Gun
+    yeagle.draw(display, scroll, angle)
     #Player Blitting
-    player.move(tile_rects, time, dt, display, scroll)
+    player.move(tile_rects, time, dt, display, scroll, yeagle.facing_direction())
     player.draw(display, scroll)
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)
     blit_inventory(display, inventory, inven_font)
-    for bullet in bullet_list:
-        bullet.move()
-        bullet.draw(display)
+    if player.right_facing():
+        player_x = player.get_rect().x + 22
+        player_y = player.get_rect().y + 15
+    else:
+        player_x = player.get_rect().x - 1
+        player_y = player.get_rect().y + 15
+    #Updating gun
+    #angle = math.atan2((player_y - scroll[1] - mpos[1]//2) , (player_x - scroll[0] - mpos[0]//2))
+    angle = math.atan2(( mpos[1]//2 - (player_y - scroll[1])) , (mpos[0]//2 - (player.get_rect().x - scroll[0])))
+    angle *= -1
+    yeagle.update((player_x - 16, player_y))
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
@@ -160,17 +174,7 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                print("Clicked", mpos[0]//2, mpos[1]//2, player.get_rect().x - scroll[0], player.get_rect().y - scroll[1])
-                if player.right_facing():
-                    player_x = player.get_rect().x + 32
-                    player_y = player.get_rect().y + 15
-                else:
-                    player_x = player.get_rect().x - 14
-                    player_y = player.get_rect().y + 15
-                angle = math.atan2((player_y - scroll[1] - mpos[1]//2) , (player_x - scroll[0] - mpos[0]//2))
-                print(angle)
-                angle = angle * -1
-                bullet_list.append(bullet_class.Bullet((player_x - scroll[0], player_y - scroll[1]), 10, 10, None, angle))
+                yeagle.shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle)
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
     surf = pygame.transform.scale(display, (screen_w, screen_h))
