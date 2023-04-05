@@ -219,18 +219,18 @@ while run:
     #Angle Calculation
     angle = math.atan2(( mpos[1]//2 - (player_y - scroll[1])) , (mpos[0]//2 - (player.get_rect().x - scroll[0])))
     angle *= -1
-    if inventory_items.get(str(inven_slot)) != None:
-        if inventory[inven_slot] == "p":
-            inventory_items[str(inven_slot)].draw(display, scroll, angle)
-            inventory_items[str(inven_slot)].update((player_x - 16, player_y))
     #Player Blitting
     if inventory[inven_slot] == "p":
-        player.move(tile_rects, time, dt, display, scroll, True, inventory_items[str(inven_slot)].facing_direction())
+        player.move(tile_rects, time, dt, display, scroll, True, inventory_items[str(inven_slot)].facing_direction(), inventory_items[str(inven_slot)])
     else:
         player.move(tile_rects, time, dt, display, scroll, False, yeagle.facing_direction())
     player.draw(display, scroll)
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)
+    if inventory_items.get(str(inven_slot)) != None:
+        if inventory[inven_slot] == "p":
+            inventory_items[str(inven_slot)].draw(display, scroll, angle)
+            inventory_items[str(inven_slot)].update()
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():

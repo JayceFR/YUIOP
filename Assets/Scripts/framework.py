@@ -105,10 +105,10 @@ class Player():
                 collision_types["top"] = True
         return collision_types
 
-    def move(self, tiles, time, dt, display, scroll, gun, facing_right):
+    def move(self, tiles, time, dt, display, scroll, gun, facing_right, pistol = None):
         self.movement = [0, 0]
         if (self.moving_left or self.moving_right) and not self.jump:
-            self.speed += self.acceleration
+            #self.speed += self.acceleration
             if self.speed > 8:
                 self.speed = 8
             self.frame_cooldown -= self.deceleration
@@ -118,7 +118,7 @@ class Player():
             self.speed = 5
             self.frame_cooldown = 200
         if self.moving_right:
-            self.movement[0] += self.speed * dt
+            self.movement[0] += self.speed * dt 
             self.moving_right = False
             if self.facing_left:
                 self.facing_right = True
@@ -161,6 +161,13 @@ class Player():
             self.movement[1] += self.gravity
 
         self.collision_type = self.collision_checker(tiles)
+
+        if pistol != None:
+            if self.facing_right:
+                pistol.rect.x = self.rect.x
+            else:
+                pistol.rect.x = self.rect.x - 8
+            pistol.rect.y = self.rect.y + 15
 
         if self.collision_type['bottom']:
             if self.in_air:

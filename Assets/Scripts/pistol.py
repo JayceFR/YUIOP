@@ -23,7 +23,7 @@ class Pistol():
             if math.degrees(angle) > -130 and math.degrees(angle) < 0:
                 self.rect.x += 8
             if math.degrees(angle) > 90.0 and math.degrees(angle) < 180:
-                self.rect.x += 8
+                self.rect.x += 2
                 self.rect.y -= 10
             display_gun_copy = self.pistol_img.copy()
             display_gun_copy = pygame.transform.flip(display_gun_copy, False, True)
@@ -43,14 +43,12 @@ class Pistol():
         for bullet in self.bullets:
             bullet.draw(display)
     
-    def update(self, new_loc):
+    def update(self):
         for pos, bullet in sorted(enumerate(self.bullets), reverse=True):
             if bullet.alive:
                 bullet.move()
             else:
                 self.bullets.pop(pos)
-        self.rect.x = new_loc[0]
-        self.rect.y = new_loc[1]
     
     def facing_direction(self):
         return self.facing_right
