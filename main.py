@@ -101,6 +101,8 @@ grass_cooldown = 50
 map = f.Map("./Assets/Maps/map.txt",tiles,tree_img)
 #Player settings
 player_idle_animation = []
+player_x = 0
+player_y = 0
 player_run_animation = []
 for x in range(4):
     player_idle_animation.append(get_image(player_idle_img, x, 21, 33, 1.2, (0,0,0)))
