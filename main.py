@@ -198,7 +198,7 @@ while run:
     #Smg Spray Shoot
     if smg_spray:
         if time - smg_last_update > smg_cooldown:
-            inventory_items[str(inven_slot)].shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle)
+            inventory_items[str(inven_slot)].shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle, time)
             smg_last_update = time   
     #Inventory Calculation
     if key[pygame.K_1]:
@@ -230,7 +230,7 @@ while run:
     if inventory_items.get(str(inven_slot)) != None:
         if inventory[inven_slot] == "p":
             inventory_items[str(inven_slot)].draw(display, scroll, angle)
-            inventory_items[str(inven_slot)].update()
+            inventory_items[str(inven_slot)].update(time)
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
