@@ -19,13 +19,22 @@ class Pistol():
         self.rect.y -= scroll[1]
         display_gun = self.pistol_img.copy()
         display_gun = pygame.transform.rotate(display_gun, math.degrees(angle))
+        print(math.degrees(angle))
         if math.degrees(angle) < -91.0 or math.degrees(angle) > 91.0:
+            if math.degrees(angle) > -130 and math.degrees(angle) < 0:
+                self.rect.x += 8
+            
             display_gun_copy = self.pistol_img.copy()
             display_gun_copy = pygame.transform.flip(display_gun_copy, False, True)
             display_gun_copy = pygame.transform.rotate(display_gun_copy, math.degrees(angle))
             display.blit(display_gun_copy, self.rect)
             self.facing_right = False
         else: 
+            if math.degrees(angle) > 92 and math.degrees(angle) < 160:
+                self.rect.y -= 10
+                self.rect.x += 9
+            if math.degrees(angle) > 9.0 and math.degrees(angle) < 88.0:
+                self.rect.y -= 9
             display.blit(display_gun, self.rect)
             self.facing_right = True
         self.rect.x = self.dup_x
