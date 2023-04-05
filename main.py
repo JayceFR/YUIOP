@@ -31,19 +31,31 @@ def blit_grass(grasses, display, scroll, player):
             grass.colliding()
         grass.draw(display, scroll)
 
-def blit_inventory(display, inventory, font):
+def blit_inventory(display, inventory, font, item_dict, item_slot):
     left = 400
     pygame.draw.line(display, (255,255,255), (left - 10, 300), (left, 270))
     pygame.draw.line(display, (255,255,255), (left, 270), (500, 270))
     for x in range(len(inventory)):
-        pygame.draw.rect(display, (150,0,0), pygame.rect.Rect(left, 275, 20, 20), border_radius=5)
+        if item_slot == x:
+            pygame.draw.rect(display, (0,150,0), pygame.rect.Rect(left, 275, 20, 20), border_radius=5)    
+        else:
+            pygame.draw.rect(display, (150,0,0), pygame.rect.Rect(left, 275, 20, 20), border_radius=5)
         draw_text(str(x+1), font, (255,255,255), left + 9, 294, display)
         pygame.draw.rect(display, (0,0,0), pygame.rect.Rect(left + 2, 275 + 2.5, 20 - 2.5, 20 - 2.5), border_radius=4)
+        if item_dict.get(inventory[x]) != None:
+            if item_dict[inventory[x]][0] == "Pistol":
+                display.blit(item_dict[inventory[x]][1], (left + 3, 275 + 3.5))
         left += 25
 
 def draw_text(text, font, text_col, x, y, display):
     img = font.render(text, True, text_col)
     display.blit(img, (x, y))
+
+def free_inventory_slot(inventory):
+    for x in range(len(inventory)):
+        if inventory[x] == "":
+            return x
+    return "full"
 
 #Display settings 
 screen_w = 1000
@@ -75,6 +87,10 @@ tree_img.set_colorkey((235,237,233))
 pistol_img = pygame.image.load("./Assets/Entities/pistol.png").convert_alpha()
 pistol_img.set_colorkey((0,0,0))
 bullet_img = pygame.image.load("./Assets/Entities/bullet.png").convert_alpha()
+bullet_img.set_colorkey((255,255,255))
+pistol_logo_img = pistol_img.copy()
+pistol_logo_img = pygame.transform.scale(pistol_logo_img, (pistol_logo_img.get_width()//2, pistol_img.get_height()//2))
+pistol_logo_img = pygame.transform.rotate(pistol_logo_img, 45)
 #Grass
 grasses = []
 grass_loc = []
@@ -100,6 +116,7 @@ circle_back = back_circles.CircleGen()
 pygame.mouse.set_visible(False)
 #Fonts
 inven_font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 5)
+pick_up_font = pygame.font.Font("./Assets/Fonts/jayce.ttf", 15)
 #lightings
 glow_effects = []
 for x in range(150):
@@ -109,12 +126,23 @@ bg = backg.background()
 bg_particle_effect = bg_particles.Master()
 #Inventory
 inventory = ["", "", "", ""]
+inventory_items = {"0": None, "1": None, "2": None, "3": None}    #{'0' : pistol_object}
+inven_slot = -1
 #Pistol
 angle = 0
+smg_spray = False
+pistol_locs = []
+pistols = []
+smg_cooldown = 100
+pistol_spawn = True
+smg_last_update = 0
 yeagle = pistol.Pistol((35, 45), pistol_img.get_width(), pistol_img.get_height(), pistol_img, bullet_img)
+#Dictionary Of Items
+item_dict = {"p" : ["Pistol", pistol_logo_img, -2]}
 #Main Game Loop
 while run:
     clock.tick(60)
+    key = pygame.key.get_pressed()
     dt = t.time() - last_time
     dt *= 60
     last_time = t.time()
@@ -128,7 +156,7 @@ while run:
     #Mouse Settings 
     mpos = pygame.mouse.get_pos()
     #Blitting the Map
-    tile_rects, grass_loc = map.blit_map(display, scroll)
+    tile_rects, grass_loc, pistol_locs = map.blit_map(display, scroll)
     #Creating Items
     if grass_spawn:
         for loc in grass_loc:
@@ -137,25 +165,51 @@ while run:
                 x_pos += 2.5
                 grasses.append(g.grass([x_pos, loc[1]+14], 2, 18))
         grass_spawn = False
+    if pistol_spawn:
+        for loc in pistol_locs:
+            pistols.append(pistol.Pistol(loc, pistol_img.get_width(), pistol_img.get_height(), pistol_img, bullet_img))
+        pistol_spawn = False
     #Movement of grass
     if time - grass_last_update > grass_cooldown:
         for grass in grasses:
             grass.move()
         grass_last_update = time
+    #Drawing pistols
+    for position, p in sorted(enumerate(pistols), reverse=True):
+        if p.get_rect().colliderect(player.get_rect()):
+            #pop up e
+            draw_text("E",pick_up_font, (255,255,255), p.get_rect().x - scroll[0] + 16, p.get_rect().y - 16 - scroll[1], display )
+            if key[pygame.K_e]:
+                pos = free_inventory_slot(inventory)
+                if pos != "full" and item_dict["p"][2] < 0:
+                    inventory[pos] = "p"
+                    item_dict["p"][2] = pos
+                    inventory_items[str(pos)] = p
+                    pistols.pop(position)
+        p.draw(display, scroll, 0)
     #Calculating Scroll
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 262) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 162) / 5
     scroll = true_scroll.copy()
     scroll[0] = int(scroll[0])
     scroll[1] = int(scroll[1])
+    #Smg Spray Shoot
+    if smg_spray:
+        if time - smg_last_update > smg_cooldown:
+            inventory_items[str(inven_slot)].shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle)
+            smg_last_update = time
     #Blitting The Gun
-    yeagle.draw(display, scroll, angle)
-    #Player Blitting
-    player.move(tile_rects, time, dt, display, scroll, yeagle.facing_direction())
-    player.draw(display, scroll)
-    #Blitting Items After Blitting The Player
-    blit_grass(grasses, display, scroll, player)
-    blit_inventory(display, inventory, inven_font)
+    
+    #Inventory Calculation
+    if key[pygame.K_1]:
+        inven_slot = 0
+    if key[pygame.K_2]:
+        inven_slot = 1
+    if key[pygame.K_3]:
+        inven_slot = 2
+    if key[pygame.K_4]:
+        inven_slot = 3
+    blit_inventory(display, inventory, inven_font, item_dict, inven_slot)
     if player.right_facing():
         player_x = player.get_rect().x + 22
         player_y = player.get_rect().y + 15
@@ -166,7 +220,18 @@ while run:
     #angle = math.atan2((player_y - scroll[1] - mpos[1]//2) , (player_x - scroll[0] - mpos[0]//2))
     angle = math.atan2(( mpos[1]//2 - (player_y - scroll[1])) , (mpos[0]//2 - (player.get_rect().x - scroll[0])))
     angle *= -1
-    yeagle.update((player_x - 16, player_y))
+    if inventory_items.get(str(inven_slot)) != None:
+        if inventory[inven_slot] == "p":
+            inventory_items[str(inven_slot)].draw(display, scroll, angle)
+            inventory_items[str(inven_slot)].update((player_x - 16, player_y))
+    #Player Blitting
+    if inventory[inven_slot] == "p":
+        player.move(tile_rects, time, dt, display, scroll, True, inventory_items[str(inven_slot)].facing_direction())
+    else:
+        player.move(tile_rects, time, dt, display, scroll, False, yeagle.facing_direction())
+    player.draw(display, scroll)
+    #Blitting Items After Blitting The Player
+    blit_grass(grasses, display, scroll, player)
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
@@ -174,7 +239,14 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                yeagle.shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle)
+                #Normal Click To Shoot
+                #yeagle.shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle)
+                #Hold To Fire
+                if inventory[inven_slot] == "p":
+                    smg_spray = True
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                smg_spray = False
     #Background Particles
     bg_particle_effect.recursive_call(time, display, scroll, dt)
     surf = pygame.transform.scale(display, (screen_w, screen_h))

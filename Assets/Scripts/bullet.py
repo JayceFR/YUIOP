@@ -4,10 +4,11 @@ import math
 class Bullet():
     def __init__(self, loc, width, height, img, angle) -> None:
         self.rect = pygame.rect.Rect(loc[0], loc[1], width, height)
-        self.img = img
+        self.img = img.copy()
+        self.img = pygame.transform.rotate(self.img, math.degrees(angle))
         self.alive = True
         self.angle = angle
-        self.speed = 5
+        self.speed = 30
 
     def move(self):
         self.rect.x += math.cos(self.angle) * self.speed
@@ -16,4 +17,5 @@ class Bullet():
             self.alive = False
     
     def draw(self, display):
-        pygame.draw.circle(display, (255,255,255), (self.rect.x, self.rect.y), 4)
+        #pygame.draw.circle(display, (255,255,255), (self.rect.x, self.rect.y), 4)
+        display.blit(self.img, (self.rect.x, self.rect.y))

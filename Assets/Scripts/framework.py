@@ -105,7 +105,7 @@ class Player():
                 collision_types["top"] = True
         return collision_types
 
-    def move(self, tiles, time, dt, display, scroll, facing_right):
+    def move(self, tiles, time, dt, display, scroll, gun, facing_right):
         self.movement = [0, 0]
         if (self.moving_left or self.moving_right) and not self.jump:
             self.speed += self.acceleration
@@ -181,13 +181,13 @@ class Player():
                 self.dusts.pop(pos)
             else:
                 dust.draw(display, time, scroll)
-        
-        if facing_right:
-            self.facing_right = True
-            self.facing_left = False
-        else:
-            self.facing_left = True
-            self.facing_right = False
+        if gun:
+            if facing_right:
+                self.facing_right = True
+                self.facing_left = False
+            else:
+                self.facing_left = True
+                self.facing_right = False
 
 
     def get_rect(self):
@@ -213,20 +213,23 @@ class Map():
         y = 0 
         tile_rects = []
         grass_loc = []
+        pistol_loc = []
         for row in self.map:
             x = 0 
             for element in row:
-                if element != "t" and element != "g" and element != "0":
+                if element != "t" and element != "g" and element != "0" and element != "p":
                     window.blit(self.tiles[int(element)-1], (x * 32 - scroll[0], y * 32 - scroll[1]))
                 if element == "t":
                     window.blit(self.tree, (x * 32 - scroll[0] - 70, y * 32 - scroll[1] - 150))
                 if element == "g":
                     grass_loc.append((x*32, y*32))
-                if element != "0" and element != "t" and element != "g":
+                if element == "p":
+                    pistol_loc.append((x*32, y*32))
+                if element != "0" and element != "t" and element != "g" and element != "p":
                     tile_rects.append(pygame.rect.Rect(x*32,y*32,32,32))
                 x += 1
             y += 1
-        return tile_rects, grass_loc
+        return tile_rects, grass_loc, pistol_loc
 
 
 class Glow():

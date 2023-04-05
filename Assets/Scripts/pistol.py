@@ -49,3 +49,6 @@ class Pistol():
     def shoot(self, loc, width, height, angle):
         #Creating a bullet
         self.bullets.append(b.Bullet(loc, width, height, self.bullet_img, angle))
+    
+    def get_rect(self):
+        return self.rect
