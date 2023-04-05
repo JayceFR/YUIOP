@@ -23,7 +23,6 @@ class Pistol():
             if math.degrees(angle) > -130 and math.degrees(angle) < 0:
                 self.rect.x += 8
             if math.degrees(angle) > 90.0 and math.degrees(angle) < 180:
-                print("I am here")
                 self.rect.x += 8
                 self.rect.y -= 10
             display_gun_copy = self.pistol_img.copy()
