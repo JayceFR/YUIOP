@@ -197,9 +197,7 @@ while run:
     if smg_spray:
         if time - smg_last_update > smg_cooldown:
             inventory_items[str(inven_slot)].shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle)
-            smg_last_update = time
-    #Blitting The Gun
-    
+            smg_last_update = time   
     #Inventory Calculation
     if key[pygame.K_1]:
         inven_slot = 0
@@ -216,8 +214,7 @@ while run:
     else:
         player_x = player.get_rect().x - 1
         player_y = player.get_rect().y + 15
-    #Updating gun
-    #angle = math.atan2((player_y - scroll[1] - mpos[1]//2) , (player_x - scroll[0] - mpos[0]//2))
+    #Angle Calculation
     angle = math.atan2(( mpos[1]//2 - (player_y - scroll[1])) , (mpos[0]//2 - (player.get_rect().x - scroll[0])))
     angle *= -1
     if inventory_items.get(str(inven_slot)) != None:
