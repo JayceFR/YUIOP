@@ -67,6 +67,7 @@ class Pistol():
         if self.recoil:
             if time - self.recoil_last_update > self.recoil_cooldown:
                 self.recoil = False
+        return self.bullets
     
     def facing_direction(self):
         return self.facing_right

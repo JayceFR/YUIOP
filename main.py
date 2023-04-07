@@ -15,6 +15,8 @@ import Assets.Scripts.grass as g
 import Assets.Scripts.circle_back as back_circles
 import Assets.Scripts.pistol as pistol
 import Assets.Scripts.smg as smg
+import Assets.Scripts.rocket as rocket
+import Assets.Scripts.sparks as spark
 pygame.init()
 from pygame.locals import *
 
@@ -47,6 +49,8 @@ def blit_inventory(display, inventory, font, item_dict, item_slot):
             if item_dict[inventory[x]][0] == "Pistol":
                 display.blit(item_dict[inventory[x]][1], (left + 3, 275 + 3.5))
             if item_dict[inventory[x]][0] == "SMG":
+                display.blit(item_dict[inventory[x]][1], (left + 3, 275 + 3.5))
+            if item_dict[inventory[x]][0] == "Rocket":
                 display.blit(item_dict[inventory[x]][1], (left + 3, 275 + 3.5))
         left += 25
 
@@ -92,14 +96,27 @@ pistol_img.set_colorkey((0,0,0))
 smg_img = pygame.image.load("./Assets/Entities/smg.png").convert_alpha()
 smg_img = pygame.transform.scale(smg_img, (smg_img.get_width()*1.5, smg_img.get_height()*1.5))
 smg_img.set_colorkey((0,0,0))
+rocketb_img = pygame.image.load("./Assets/Entities/rocketb.png").convert_alpha()
+rocketb_img = pygame.transform.scale(rocketb_img, (rocketb_img.get_width()*2.5, rocketb_img.get_height()*2.5))
+rocketb_img.set_colorkey((0,0,0))
+rocket_img = pygame.image.load("./Assets/Entities/rocket.png").convert_alpha()
+rocket_img = pygame.transform.scale(rocket_img, (rocket_img.get_width()*2.5, rocket_img.get_height()*2.5))
+rocket_img.set_colorkey((0,0,0))
+rocket_ammo_img = pygame.image.load("./Assets/Entities/rocket_ammo.png").convert_alpha()
+rocket_ammo_img = pygame.transform.scale(rocket_ammo_img, (rocket_ammo_img.get_width()*2, rocket_ammo_img.get_height()*2))
+rocket_ammo_img.set_colorkey((0,0,0))
 bullet_img = pygame.image.load("./Assets/Entities/bullet.png").convert_alpha()
 bullet_img.set_colorkey((255,255,255))
+smg_bullet_img = pygame.image.load("./Assets/Entities/smg_bullet.png").convert_alpha()
 pistol_logo_img = pistol_img.copy()
 pistol_logo_img = pygame.transform.scale(pistol_logo_img, (pistol_logo_img.get_width()//2, pistol_img.get_height()//2))
 pistol_logo_img = pygame.transform.rotate(pistol_logo_img, 45)
 smg_logo_img = smg_img.copy()
 smg_logo_img = pygame.transform.scale(smg_logo_img, (smg_logo_img.get_width()//2, smg_logo_img.get_height()//2))
 smg_logo_img = pygame.transform.rotate(smg_logo_img, 45)
+rocket_logo_img = pygame.image.load("./Assets/Entities/rocket.png").convert_alpha()
+rocket_logo_img = pygame.transform.scale(rocket_logo_img, (rocket_logo_img.get_width()//1.5, rocket_logo_img.get_height()//1.5))
+rocket_logo_img = pygame.transform.rotate(rocket_logo_img, 45)
 #Grass
 grasses = []
 grass_loc = []
@@ -139,6 +156,10 @@ bg_particle_effect = bg_particles.Master()
 inventory = ["", "", "", ""]
 inventory_items = {"0": None, "1": None, "2": None, "3": None}    #{'0' : pistol_object}
 inven_slot = -1
+#Rocket
+rocket_locs = []
+rockets = []
+rocket_spawn = True
 #SMG
 smg_locs = []
 smgs = []
@@ -151,9 +172,11 @@ pistols = []
 smg_cooldown = 100
 pistol_spawn = True
 smg_last_update = 0
+bullets = []
+sparks = []
 yeagle = pistol.Pistol((35, 45), pistol_img.get_width(), pistol_img.get_height(), pistol_img, bullet_img)
 #Dictionary Of Items
-item_dict = {"p" : ["Pistol", pistol_logo_img, -2], "s" : ["SMG", smg_logo_img, -2]}
+item_dict = {"p" : ["Pistol", pistol_logo_img, -2], "s" : ["SMG", smg_logo_img, -2], "r" : ["Rocket", rocket_logo_img, -2]}
 #Main Game Loop
 while run:
     clock.tick(60)
@@ -171,7 +194,7 @@ while run:
     #Mouse Settings 
     mpos = pygame.mouse.get_pos()
     #Blitting the Map
-    tile_rects, grass_loc, pistol_locs, smg_locs = map.blit_map(display, scroll)
+    tile_rects, grass_loc, pistol_locs, smg_locs, rocket_locs = map.blit_map(display, scroll)
     #Creating Items
     if grass_spawn:
         for loc in grass_loc:
@@ -180,9 +203,13 @@ while run:
                 x_pos += 2.5
                 grasses.append(g.grass([x_pos, loc[1]+14], 2, 18))
         grass_spawn = False
+    if rocket_spawn:
+        for loc in rocket_locs:
+            rockets.append(rocket.Rocket(loc, rocketb_img.get_width(), rocketb_img.get_height(), rocketb_img, rocket_img, rocket_ammo_img))
+        rocket_spawn = False
     if smg_spawn:
         for loc in smg_locs:
-            smgs.append(smg.SMG(loc, smg_img.get_width(), smg_img.get_height(), smg_img, bullet_img))
+            smgs.append(smg.SMG(loc, smg_img.get_width(), smg_img.get_height(), smg_img, smg_bullet_img))
         smg_spawn = False
     if pistol_spawn:
         for loc in pistol_locs:
@@ -219,6 +246,19 @@ while run:
                     inventory_items[str(pos)] = p
                     smgs.pop(position)
         p.draw(display, scroll, 0)
+    #Drawing Rockets
+    for position, p in sorted(enumerate(rockets), reverse=True):
+        if p.get_rect().colliderect(player.get_rect()):
+            #pop up e
+            draw_text("E",pick_up_font, (255,255,255), p.get_rect().x - scroll[0] + 16, p.get_rect().y - 16 - scroll[1], display )
+            if key[pygame.K_e]:
+                pos = free_inventory_slot(inventory)
+                if pos != "full" and item_dict["r"][2] < 0:
+                    inventory[pos] = "r"
+                    item_dict["r"][2] = pos
+                    inventory_items[str(pos)] = p
+                    rockets.pop(position)
+        p.draw(display, scroll, 0)
     #Calculating Scroll
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 262) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 162) / 5
@@ -250,17 +290,34 @@ while run:
     angle = math.atan2(( mpos[1]//2 - (player_y - scroll[1])) , (mpos[0]//2 - (player.get_rect().x - scroll[0])))
     angle *= -1
     if inventory_items.get(str(inven_slot)) != None:
-        if inventory[inven_slot] == "p" or inventory[inven_slot] == "s":
+        if inventory[inven_slot] == "p" or inventory[inven_slot] == "s" or inventory[inven_slot] == "r":
             inventory_items[str(inven_slot)].draw(display, scroll, angle)
-            inventory_items[str(inven_slot)].update(time)
+            bullets = inventory_items[str(inven_slot)].update(time)
+    for tile in tile_rects:
+        for bullet in bullets:
+            bullet_x = bullet.get_rect().x
+            bullet_y = bullet.get_rect().y
+            bullet.get_rect().x += scroll[0]
+            bullet.get_rect().y += scroll[1]
+            if tile.colliderect(bullet.get_rect()):
+                bullet.alive = False
+                for x in range(30):
+                    sparks.append(spark.Spark([bullet_x , bullet_y], math.radians(random.randint(0,360)), random.randint(7,14), (255,255,255), 2, 1))
+            bullet.get_rect().x = bullet_x
+            bullet.get_rect().y = bullet_y
     #Player Blitting
-    if inventory[inven_slot] == "p" or inventory[inven_slot] == "s":
+    if inventory[inven_slot] == "p" or inventory[inven_slot] == "s" or inventory[inven_slot] == "r":
         player.move(tile_rects, time, dt, display, scroll, True, inventory_items[str(inven_slot)].facing_direction(), inventory_items[str(inven_slot)])
     else:
         player.move(tile_rects, time, dt, display, scroll, False, yeagle.facing_direction())
     player.draw(display, scroll)
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)
+    #Sparks Blitting
+
+    for s in sparks:
+        s.move(dt)
+        s.draw(display)
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():
@@ -273,7 +330,7 @@ while run:
                 #Hold To Fire
                 if inventory[inven_slot] == "s":
                     smg_spray = True
-                if inventory[inven_slot] == "p":
+                if inventory[inven_slot] == "p" or inventory[inven_slot] == "r":
                     inventory_items[str(inven_slot)].shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle, time)
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:

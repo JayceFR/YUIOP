@@ -19,3 +19,6 @@ class Bullet():
     def draw(self, display):
         #pygame.draw.circle(display, (255,255,255), (self.rect.x, self.rect.y), 4)
         display.blit(self.img, (self.rect.x, self.rect.y))
+    
+    def get_rect(self):
+        return self.rect
