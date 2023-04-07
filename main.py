@@ -12,7 +12,6 @@ import Assets.Scripts.framework as f
 import Assets.Scripts.background as backg
 import Assets.Scripts.bg_particles as bg_particles
 import Assets.Scripts.grass as g
-import Assets.Scripts.circle_back as back_circles
 import Assets.Scripts.pistol as pistol
 import Assets.Scripts.smg as smg
 import Assets.Scripts.rocket as rocket
@@ -139,7 +138,6 @@ player = f.Player(30,30,player_idle_animation[0].get_width(),player_idle_animati
 true_scroll = [0,0]
 scroll = [0,0]
 last_time = t.time()
-circle_back = back_circles.CircleGen()
 #Mouse Settings
 pygame.mouse.set_visible(False)
 #Fonts
