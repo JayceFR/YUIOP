@@ -341,6 +341,22 @@ while run:
                     smg_spray = True
                 if inventory[inven_slot] == "p" or inventory[inven_slot] == "r":
                     inventory_items[str(inven_slot)].shoot((player_x - scroll[0], player_y - scroll[1]), bullet_img.get_width(), bullet_img.get_height(), angle, time)
+            if event.button == 3:
+                if inventory[inven_slot] == "p":
+                    inventory[inven_slot] = ""
+                    item_dict["p"][2] = -2
+                    pistols.append(inventory_items[str(inven_slot)])
+                    inventory_items[str(inven_slot)] = None
+                if inventory[inven_slot] == "s":
+                    inventory[inven_slot] = ""
+                    item_dict["s"][2] = -2
+                    smgs.append(inventory_items[str(inven_slot)])
+                    inventory_items[str(inven_slot)] = None
+                if inventory[inven_slot] == "r":
+                    inventory[inven_slot] = ""
+                    item_dict["r"][2] = -2
+                    rockets.append(inventory_items[str(inven_slot)])
+                    inventory_items[str(inven_slot)] = None
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 smg_spray = False
