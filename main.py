@@ -19,7 +19,7 @@ import Assets.Scripts.sparks as spark
 pygame.init()
 from pygame.locals import *
 
-#Getting image
+#Getting image from spirtesheet
 def get_image(sheet, frame, width, height, scale, colorkey):
     image = pygame.Surface((width, height)).convert_alpha()
     image.blit(sheet, (0, 0), ((frame * width), 0, width, height))
@@ -232,6 +232,7 @@ while run:
                     inventory_items[str(pos)] = p
                     pistols.pop(position)
         p.draw(display, scroll, 0)
+        p.update(time, tile_rects)
     #Drawing smgs
     for position, p in sorted(enumerate(smgs), reverse=True):
         if p.get_rect().colliderect(player.get_rect()):
@@ -245,6 +246,7 @@ while run:
                     inventory_items[str(pos)] = p
                     smgs.pop(position)
         p.draw(display, scroll, 0)
+        p.update(time, tile_rects)
     #Drawing Rockets
     for position, p in sorted(enumerate(rockets), reverse=True):
         if p.get_rect().colliderect(player.get_rect()):
@@ -258,6 +260,7 @@ while run:
                     inventory_items[str(pos)] = p
                     rockets.pop(position)
         p.draw(display, scroll, 0)
+        p.update(time, tile_rects)
     #Calculating Scroll
     true_scroll[0] += (player.get_rect().x - true_scroll[0] - 262) / 5
     true_scroll[1] += (player.get_rect().y - true_scroll[1] - 162) / 5
@@ -291,7 +294,7 @@ while run:
     if inventory_items.get(str(inven_slot)) != None:
         if inventory[inven_slot] == "p" or inventory[inven_slot] == "s" or inventory[inven_slot] == "r":
             inventory_items[str(inven_slot)].draw(display, scroll, angle)
-            bullets = inventory_items[str(inven_slot)].update(time)
+            bullets = inventory_items[str(inven_slot)].update(time, tile_rects)
     for tile in tile_rects:
         for bullet in bullets:
             bullet_x = bullet.get_rect().x

@@ -12,11 +12,42 @@ class SMG():
         self.dup_y = 0
         self.pistol_img = pistol_img
         self.bullet_img = bullet_img
+        self.free_handed = True
         self.bullets = []
         self.particles = []
         self.recoil = False
         self.recoil_cooldown = 50
         self.recoil_last_update = 0
+        self.movement = []
+    
+    def collision_test(self, tiles):
+        hitlist = []
+        for tile in tiles:
+            if self.rect.colliderect(tile):
+                hitlist.append(tile)
+        return hitlist
+    
+    def collision_checker(self, tiles):
+        collision_types = {"top": False, "bottom": False, "right": False, "left": False}
+        self.rect.x += self.movement[0]
+        hit_list = self.collision_test(tiles)
+        for tile in hit_list:
+            if self.movement[0] > 0:
+                self.rect.right = tile.left
+                collision_types["right"] = True
+            elif self.movement[0] < 0:
+                self.rect.left = tile.right
+                collision_types["left"] = True
+        self.rect.y += self.movement[1]
+        hit_list = self.collision_test(tiles)
+        for tile in hit_list:
+            if self.movement[1] > 0:
+                self.rect.bottom = tile.top
+                collision_types["bottom"] = True
+            if self.movement[1] < 0:
+                self.rect.top = tile.bottom
+                collision_types["top"] = True
+        return collision_types
     
     def draw(self, display, scroll, angle):
         if self.recoil:
@@ -58,7 +89,11 @@ class SMG():
                 particle.move(1)
                 particle.draw(display)
     
-    def update(self, time):
+    def update(self, time, tiles):
+        if self.free_handed:
+            self.movement = [0,0]
+            self.movement[1] += 9.8
+            self.collision_checker(tiles)
         for pos, bullet in sorted(enumerate(self.bullets), reverse=True):
             if bullet.alive:
                 bullet.move()
