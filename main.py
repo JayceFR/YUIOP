@@ -172,6 +172,7 @@ pistol_spawn = True
 smg_last_update = 0
 bullets = []
 sparks = []
+smokes = []
 yeagle = pistol.Pistol((35, 45), pistol_img.get_width(), pistol_img.get_height(), pistol_img, bullet_img)
 #Dictionary Of Items
 item_dict = {"p" : ["Pistol", pistol_logo_img, -2], "s" : ["SMG", smg_logo_img, -2], "r" : ["Rocket", rocket_logo_img, -2]}
@@ -300,7 +301,11 @@ while run:
             if tile.colliderect(bullet.get_rect()):
                 bullet.alive = False
                 for x in range(30):
-                    sparks.append(spark.Spark([bullet_x , bullet_y], math.radians(random.randint(0,360)), random.randint(7,14), (255,255,255), 2, 1))
+                    if bullet.get_gun() == "r":
+                        sparks.append(spark.Spark([bullet_x , bullet_y], math.radians(random.randint(0,360)), random.randint(7,14), (255,255,255), 2, 1))
+                    else:
+                        smokes.append(f.Smoke((bullet_x + scroll[0], bullet_y + scroll[1])))
+
             bullet.get_rect().x = bullet_x
             bullet.get_rect().y = bullet_y
     #Player Blitting
@@ -312,10 +317,13 @@ while run:
     #Blitting Items After Blitting The Player
     blit_grass(grasses, display, scroll, player)
     #Sparks Blitting
-
     for s in sparks:
         s.move(dt)
         s.draw(display)
+    #Smoke Blitting
+    for s in smokes:
+        s.draw(display, scroll,time)
+
     #Mouse Blitting
     pygame.draw.circle(display,(200,0,0), (mpos[0]//2, mpos[1]//2), 4)
     for event in pygame.event.get():

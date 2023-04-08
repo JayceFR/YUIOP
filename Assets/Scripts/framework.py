@@ -1,5 +1,6 @@
 import random
 import pygame
+import math
 
 class Player():
     def __init__(self, x,y,width,height, player_img, idle_animation, run_animation, land_img):
@@ -273,8 +274,22 @@ class Dust():
             dust.move(time)
             dust.draw(display, scroll)
 
+class Smoke():
+    def __init__(self, loc) -> None:
+        self.loc = loc
+        self.circles = []
+        for x in range(8):
+            self.circles.append(Circles(loc[0] + random.randint(-20, 20), loc[1] + random.randint(-20,20), random.randint(1,8), random.randint(1000,2000), random.randint(1,2), (255,255,255), 1, math.radians(random.randint(0,360))))
+    
+    def draw(self, display, scroll, time):
+        for pos, circle in sorted(enumerate(self.circles), reverse=True):
+            circle.draw(display, scroll)
+            circle.move(time)
+            if circle.radius < 0:
+                self.circles.pop(pos)
+
 class Circles():
-    def __init__(self,x,y,radius, cooldown, dradius, color = (21,29,40)) -> None:
+    def __init__(self,x,y,radius, cooldown, dradius, color = (21,29,40), type = 0, angle=0) -> None:
         self.x = x
         self.y = y
         self.radius = radius
@@ -282,18 +297,27 @@ class Circles():
         self.min_radius = radius - radius * 0.5
         self.last_update = 0
         self.cooldown = cooldown
+        self.angle = angle
         self.dradius = dradius
+        self.type = type
         self.color = color
         
     
     def move(self, time):
-        if time - self.last_update > self.cooldown:
-            self.radius += self.dradius
-            if self.radius > self.max_radius:
-                self.dradius *= -1
-            if self.radius < self.min_radius:
-                self.dradius *= -1
-            self.last_update = time
+        if self.type == 0:
+            if time - self.last_update > self.cooldown:
+                self.radius += self.dradius
+                if self.radius > self.max_radius:
+                    self.dradius *= -1
+                if self.radius < self.min_radius:
+                    self.dradius *= -1
+                self.last_update = time
+        if self.type == 1:
+            if time - self.last_update > self.cooldown:
+                self.radius -= self.dradius
+                self.x += math.cos(self.angle) * 5
+                self.y += math.sin(self.angle) * 5
+                self.y += 0.7
     
 
     def draw(self, display, scroll):
