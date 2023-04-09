@@ -279,7 +279,7 @@ class Smoke():
         self.loc = loc
         self.circles = []
         for x in range(8):
-            self.circles.append(Circles(loc[0] + random.randint(-20, 20), loc[1] + random.randint(-20,20), random.randint(1,8), random.randint(1000,2000), random.randint(1,2), (255,255,255), 1, math.radians(random.randint(0,360))))
+            self.circles.append(Circles(loc[0] + random.randint(-20, 20), loc[1] + random.randint(-20,20), random.randint(1,8), random.randint(1000,2000), 0.5, (255,255,255), 1, math.radians(random.randint(0,360))))
     
     def draw(self, display, scroll, time):
         for pos, circle in sorted(enumerate(self.circles), reverse=True):
