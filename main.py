@@ -116,6 +116,9 @@ smg_logo_img = pygame.transform.rotate(smg_logo_img, 45)
 rocket_logo_img = pygame.image.load("./Assets/Entities/rocket.png").convert_alpha()
 rocket_logo_img = pygame.transform.scale(rocket_logo_img, (rocket_logo_img.get_width()//1.5, rocket_logo_img.get_height()//1.5))
 rocket_logo_img = pygame.transform.rotate(rocket_logo_img, 45)
+grass_img = pygame.image.load("./Assets/Entities/grass_img.png").convert_alpha()
+grass_img = pygame.transform.scale(grass_img, (grass_img.get_width()*2, grass_img.get_height()*2))
+grass_img.set_colorkey((0,0,0))
 #Grass
 grasses = []
 grass_loc = []
@@ -199,8 +202,8 @@ while run:
         for loc in grass_loc:
             x_pos = loc[0]
             while x_pos < loc[0] + 32:
-                x_pos += 2.5
-                grasses.append(g.grass([x_pos, loc[1]+14], 2, 18))
+                x_pos += 28
+                grasses.append(g.grass([x_pos, loc[1]+14], grass_img.get_width(), grass_img.get_height(), grass_img))
         grass_spawn = False
     if rocket_spawn:
         for loc in rocket_locs:
